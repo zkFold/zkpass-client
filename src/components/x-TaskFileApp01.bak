@@ -1,0 +1,92 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+export default function TaskFileApp() {
+  const [sectionAFilePath, setSectionAFilePath] = useState('');
+  const [taskId, setTaskId] = useState('');
+  const [sectionBFilePath, setSectionBFilePath] = useState('');
+  const [fileContent, setFileContent] = useState('');
+
+  const handleFileDialog = async (setter: (value: string) => void) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) setter(file.path);
+    };
+    input.click();
+  };
+
+  const handleSend = async () => {
+    try {
+      const response = await axios.post('http://localhost:8080/task', {
+        taskId: Number(taskId),
+      });
+      const jsonData = JSON.stringify(response.data);
+      await window.electronAPI.writeFile(sectionAFilePath, jsonData); // Requires Electron preload
+    } catch (err) {
+      console.error('Error sending task:', err);
+    }
+  };
+
+  const handleRetrieve = async () => {
+    try {
+      const content = await window.electronAPI.readFile(sectionBFilePath);
+      setFileContent(content);
+    } catch (err) {
+      console.error('Error reading file:', err);
+    }
+  };
+
+  return (
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <section>
+        <h2>Section A</h2>
+        <div style={{ marginBottom: '1rem' }}>
+          <input
+            type="text"
+            placeholder="File path"
+            value={sectionAFilePath}
+            onChange={(e) => setSectionAFilePath(e.target.value)}
+            style={{ width: '60%' }}
+          />
+          <button onClick={() => handleFileDialog(setSectionAFilePath)} style={{ marginLeft: '1rem' }}>
+            Browse
+          </button>
+        </div>
+        <div>
+          <input
+            type="text"
+            placeholder="Task ID"
+            value={taskId}
+            onChange={(e) => setTaskId(e.target.value)}
+            style={{ width: '60%' }}
+          />
+          <button onClick={handleSend} style={{ marginLeft: '1rem' }}>Send</button>
+        </div>
+      </section>
+
+      <hr style={{ margin: '2rem 0' }} />
+
+      <section>
+        <h2>Section B</h2>
+        <div style={{ marginBottom: '1rem' }}>
+          <input
+            type="text"
+            placeholder="File path"
+            value={sectionBFilePath}
+            onChange={(e) => setSectionBFilePath(e.target.value)}
+            style={{ width: '60%' }}
+          />
+          <button onClick={() => handleFileDialog(setSectionBFilePath)} style={{ marginLeft: '1rem' }}>
+            Browse
+          </button>
+        </div>
+        <button onClick={handleRetrieve}>Retrieve</button>
+        <pre style={{ background: '#f1f1f1', padding: '1rem', marginTop: '1rem', whiteSpace: 'pre-wrap' }}>
+          {fileContent}
+        </pre>
+      </section>
+    </div>
+  );
+}
