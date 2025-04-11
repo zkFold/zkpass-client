@@ -70,8 +70,8 @@ export default function ZkPassApp() {
       console.log(submitData.data);
 
       setSendStatusA('✅ Reference scripts successfully sent.');
-      setPolicyIdA('PolicyId: ' + response.data.srParams.sysPolicyId);
-      setPolicyIdB(response.data.srParams.sysPolicyId);
+      setPolicyIdA('PolicyId: ' + response.data.srPolicyId);
+      setPolicyIdB(response.data.srPolicyId);
       setSetupTxRef('Transaction ID: ' + submitData.data.submitTxId);
       setScriptRefC(submitData.data.submitTxId);
       setScriptRefD(submitData.data.submitTxId);
@@ -397,6 +397,7 @@ export default function ZkPassApp() {
 	</div>
         <button onClick={handleBurn} style={{ marginLeft: '10rem' }}>Burn zkPass token</button>	
         {sendStatusD && <p style={{ marginTop: '1rem', color: sendStatusD.startsWith('✅') ? 'green' : 'red' }}>{sendStatusD}</p>}
+	{burnTxRef && <p>{burnTxRef}</p>}
       </section>
     </div>
   );
