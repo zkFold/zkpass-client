@@ -70,8 +70,8 @@ export default function ZkPassApp() {
       console.log(submitData.data);
 
       setSendStatusA('✅ Reference scripts successfully sent.');
-      setPolicyIdA('PolicyId: ' + response.data.srParams.sysPolicyId);
-      setPolicyIdB(response.data.srParams.sysPolicyId);
+      setPolicyIdA('PolicyId: ' + response.data.srPolicyId);
+      setPolicyIdB(response.data.srPolicyId);
       setSetupTxRef('Transaction ID: ' + submitData.data.submitTxId);
       setScriptRefC(submitData.data.submitTxId);
       setScriptRefD(submitData.data.submitTxId);
