@@ -397,6 +397,7 @@ export default function ZkPassApp() {
 	</div>
         <button onClick={handleBurn} style={{ marginLeft: '10rem' }}>Burn zkPass token</button>	
         {sendStatusD && <p style={{ marginTop: '1rem', color: sendStatusD.startsWith('✅') ? 'green' : 'red' }}>{sendStatusD}</p>}
+	{burnTxRef && <p>{burnTxRef}</p>}
       </section>
     </div>
   );
