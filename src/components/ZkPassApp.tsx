@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 export default function ZkPassApp() {
+  // Wallet
+  const [selectedWallet, setSelectedWallet] = useState<string>("lace");
   // Setup
   const [taskIdA, setTaskIdA] = useState('');
   const [zkpassAddr, setZkpassAddr] = useState('');
@@ -29,11 +31,9 @@ export default function ZkPassApp() {
   const [burnTxRef, setBurnTxRef] = useState('');
   const [sendStatusD, setSendStatusD] = useState('');
 
-  // 👇 Type for the selected wallet
-  const selectedWallet: string = "lace"; // or "eternl", "lace", etc.
-
   const handleSetup = async () => {
     try {
+      console.log('Selected wallet:', selectedWallet)
       const api: WalletApi = await window.cardano[selectedWallet].enable();
 
       const body = {
@@ -244,6 +244,32 @@ export default function ZkPassApp() {
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <div className="wallet-selector">
+	<label className="wallet-option">
+          <input
+            type="radio"
+            name="wallet"
+            value="lace"
+            checked={selectedWallet === "lace"}
+            onChange={(e) => setSelectedWallet(e.target.value)}
+          />
+          Lace
+	</label>
+
+	<label className="wallet-option">
+          <input
+            type="radio"
+            name="wallet"
+            value="eternl"
+            checked={selectedWallet === "eternl"}
+            onChange={(e) => setSelectedWallet(e.target.value)}
+          />
+          Eternl
+	</label>
+      </div>
+
+      <hr style={{ margin: '2rem 0' }} />
+
       <section>
         <h2>Setup zkPass</h2>
         <div className="input-row">
