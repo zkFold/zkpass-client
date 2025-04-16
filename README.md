@@ -17,7 +17,7 @@ npm run dev
 ```
 then access the dApp on http://localhost:5173/ .
 
-*Note:*  you must have the [Lace](https://www.lace.io/) wallet extension installed.
+*Note:*  you must have either [Lace](https://www.lace.io/) or [Eternl](https://eternl.io/) wallet extension installed on your browser.
 
 The zkPass dApp is divided in four sections:
 
@@ -41,13 +41,12 @@ Token minting certifies that proof for this input (i.e. zkPass result) has been 
 
 - Currency symbol is the policy id of *zkPassToken* verifier, which is parametrized by the initial setup.
 - Token name is the zkPass result.
-- Generated proof needs to be passed as redeemer in order to burn the zkPass token.
+- Generated proof needs to be passed as redeemer in order to mint the zkPass token.
 
 DApp automatically fills the TxId for the script references.  (This can be sent offline to the wallet that will perform the minting.)
 
 ### Burn and retrieve reward
 
-Allows to unlock the reward at the *forwardMint* script address by sending the proof as redeemer and, in the same transaction, burning the zkPass token.
+Allows to unlock the reward at the *forwardMint* script address by burning the zkPass token.
 
 The *token* field (automatically filled) needs to be of the form `policy.tokenname`.
-

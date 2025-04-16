@@ -62,3 +62,21 @@ pre {
   overflow-x: auto;
   font-family: monospace;
 }
+
+.wallet-selector {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  margin: 1rem 0;
+}
+
+.wallet-option {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.wallet-option input[type="radio"] {
+  margin-right: 0.5rem;
+}
