@@ -5,29 +5,25 @@ export default function ZkPassApp() {
   // Wallet
   const [selectedWallet, setSelectedWallet] = useState<string>("lace");
   // Setup
-  const [taskIdA, setTaskIdA] = useState('');
+  const [fmTag, setFMTag] = useState('');
   const [zkpassAddr, setZkpassAddr] = useState('');
   const [policyIdA, setPolicyIdA] = useState('');
   const [setupTxRef, setSetupTxRef] = useState('');
   const [sendStatusA, setSendStatusA] = useState('');
   // Transfer
-  const [taskIdB, setTaskIdB] = useState('');
   const [policyIdB, setPolicyIdB] = useState('');
   const [reward, setReward] = useState('');
   const [rewardTxRef, setRewardTxRef] = useState('');
   const [sendStatusB, setSendStatusB] = useState('');
   // Mint
   const [mintBenefAddr, setMintBenefAddr] = useState('');
-  const [scriptRefC, setScriptRefC] = useState('');
   const [zkPassResult, setZkPassResult] = useState('');
   const [zkpPolicyId, setZkpPolicyId] = useState('');
   const [zkpTknName, setZkpTknName] = useState('');
   const [mintTxRef, setMintTxRef] = useState('');
   const [sendStatusC, setSendStatusC] = useState('');
   // Burn
-  const [taskIdD, setTaskIdD] = useState('');
   const [zkPassTokenD, setZkPassTokenD] = useState('');
-  const [scriptRefD, setScriptRefD] = useState('');
   const [burnTxRef, setBurnTxRef] = useState('');
   const [sendStatusD, setSendStatusD] = useState('');
 
@@ -39,7 +35,7 @@ export default function ZkPassApp() {
       const body = {
 	ipUsedAddrs: await api.getUsedAddresses(),
         ipChangeAddr: await api.getChangeAddress(),
-        ipTaskId: Number(taskIdA),
+        ipFMTag: Number(fmTag),
 	ipZkpassAddr: zkpassAddr
       };
 
@@ -49,32 +45,48 @@ export default function ZkPassApp() {
 
       console.log(response.data);
 
-      const signedTx = await api.signTx(response.data.srUnsigned.urspTxBodyHex, true);
+      if (response.data.srOut) {
+	const srOut    = response.data.srOut
+	const signedTx = await api.signTx(srOut.soUnsigned.urspTxBodyHex, true);
 
-      const submitData = await axios.post<{
-        submitTxFee: number;
-        submitTxId: string;
-      }>(
-        "http://localhost:8080/add-wit-and-submit",
-        {
-          awasTxUnsigned: response.data.srUnsigned.urspTxBodyHex,
-          awasTxWit: signedTx,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+	const submitData = await axios.post<{
+	  submitTxFee: number;
+	  submitTxId: string;
+	}>(
+	  "http://localhost:8080/add-wit-and-submit",
+	  {
+	    awasTxUnsigned: srOut.soUnsigned.urspTxBodyHex,
+	    awasTxWit: signedTx,
+	  },
+	  {
+	    headers: {
+	      "Content-Type": "application/json",
+	    },
+	  }
+	);
 
-      console.log(submitData.data);
+	console.log(submitData.data);
 
-      setSendStatusA('✅ Reference scripts successfully sent.');
-      setPolicyIdA('PolicyId: ' + response.data.srPolicyId);
-      setPolicyIdB(response.data.srPolicyId);
-      setSetupTxRef('Transaction ID: ' + submitData.data.submitTxId);
-      setScriptRefC(submitData.data.submitTxId);
-      setScriptRefD(submitData.data.submitTxId);
+	const saveRef = await axios.post<{ srSaved: boolean }>(
+	  "http://localhost:8080/save-ref",
+	  { sriTxId: submitData.data.submitTxId },
+	  {
+	    headers: {
+	      "Content-Type": "application/json",
+	    },
+	  }
+	);
+
+	console.log("SavedRef:", saveRef.data.srSaved);
+
+	setSendStatusA('✅ Reference scripts successfully sent.');
+	setPolicyIdA('PolicyId: ' + srOut.soPolicyId);
+	setPolicyIdB(srOut.soPolicyId);
+	setSetupTxRef('Transaction ID: ' + submitData.data.submitTxId);
+      } else {
+	console.log("No setup necessary.");
+	setSendStatusA('No setup necessary (using previous setup).');
+      }
     } catch (err) {
       console.error('Error sending task:', err);
       setSendStatusA('❌ Failed to send task or write to file.');
@@ -88,7 +100,6 @@ export default function ZkPassApp() {
       const body = {
 	tiUsedAddrs: await api.getUsedAddresses(),
 	tiChangeAddr: await api.getChangeAddress(),
-	tiTaskId: Number(taskIdB),
 	tiPolicyId: policyIdB,
 	tiReward: Number(reward)
       };
@@ -134,8 +145,7 @@ export default function ZkPassApp() {
       const body = {
 	miUsedAddrs: await api.getUsedAddresses(),
 	miChangeAddr: await api.getChangeAddress(),
-	miBeneficiaryAddr: mintBenefAddr,
-	miScriptsTxOutRef: scriptRefC
+	miBeneficiaryAddr: mintBenefAddr
       };
 
       console.log(body);
@@ -183,9 +193,7 @@ export default function ZkPassApp() {
       const body = {
 	biUsedAddrs: await api.getUsedAddresses(),
 	biChangeAddr: await api.getChangeAddress(),
-	biTaskId: Number(taskIdD),
-	biZkPassToken: zkPassTokenD,
-	biScriptsTxOutRef: scriptRefD
+	biZkPassToken: zkPassTokenD
       };
 
       console.log(body);
@@ -275,16 +283,12 @@ export default function ZkPassApp() {
         <div className="input-row">
           <input
             type="text"
-            placeholder="Task ID (arbitrary integer)"
-            value={taskIdA}
-            onChange={(e) => setTaskIdA(e.target.value)}
-	    onBlur={() => {
-	      setTaskIdB(taskIdA);
-	      setTaskIdD(taskIdA);
-	    }}
+            placeholder="ForwardingMint Tag (arbitrary integer)"
+            value={fmTag}
+            onChange={(e) => setFMTag(e.target.value)}
             style={{ width: '60%' }}
           />
-	  <span>Task ID</span>
+	  <span>ForwardingMint Tag</span>
         </div>
         <div className="input-row">
           <input
@@ -296,7 +300,10 @@ export default function ZkPassApp() {
           />
           <button onClick={handleSetup} style={{ marginLeft: '0rem' }}>Setup</button>
         </div>
-        {sendStatusA && <p style={{ marginTop: '1rem', color: sendStatusA.startsWith('✅') ? 'green' : 'red' }}>{sendStatusA}</p>}
+        {sendStatusA && <p style={{ marginTop: '1rem',
+				    color: sendStatusA.startsWith('✅') ? 'green' :
+				    sendStatusA.startsWith('❌') ? 'red' : 'black'
+				  }}>{sendStatusA}</p>}
 	{sendStatusA.startsWith('✅') ? (
 	  <>
 	    <p>{policyIdA}</p>
@@ -309,19 +316,6 @@ export default function ZkPassApp() {
 
       <section>
         <h2>Transfer zkPass Reward</h2>
-        <div className="input-row">
-          <input
-            type="text"
-            placeholder="Task ID"
-            value={taskIdB}
-	    onChange={(e) => {
-	      setTaskIdB(e.target.value);
-	      setTaskIdD(e.target.value);
-	    }}
-            style={{ width: '60%' }}
-          />
-	  <span>Task ID</span>
-        </div>
         <div className="input-row">
           <input
             type="text"
@@ -359,20 +353,7 @@ export default function ZkPassApp() {
 	    style={{ width: '60%' }}
 	  />
 	  <span>zkPass recipient</span>
-	  <button onClick={setOwnAddr} style={{ marginLeft: '2rem', backgroundColor: 'gray' }}>Self</button>
-	</div>
-	<div className="input-row">
-	  <input
-	    type="text"
-	    placeholder="Script reference TxId"
-	    value={scriptRefC}
-	    onChange={(e) => {
-	      setScriptRefC(e.target.value);
-	      setScriptRefD(e.target.value);
-	    }}
-	    style={{ width: '60%' }}
-	  />
-	  <span>Script Ref TxId</span>
+	  <button onClick={setOwnAddr} style={{ marginLeft: '1rem', backgroundColor: 'gray' }}>Self</button>
 	</div>
         <button onClick={handleMint} style={{ marginLeft: '11.3rem' }}>Mint zkPass</button>
 	{zkPassResult && <p style={{ marginTop: '1rem' }}><b>zkPassResult: {zkPassResult}</b></p>}
@@ -394,32 +375,12 @@ export default function ZkPassApp() {
 	<div className="input-row">
 	  <input
 	    type="text"
-	    placeholder="Task ID"
-	    value={taskIdD}
-	    onChange={(e) => setTaskIdD(e.target.value)}
-	    style={{ width: '60%' }}
-	  />
-	  <span>Task ID</span>
-	</div>
-	<div className="input-row">
-	  <input
-	    type="text"
 	    placeholder="zkPass Token"
 	    value={zkPassTokenD}
 	    onChange={(e) => setZkPassTokenD(e.target.value)}
 	    style={{ width: '60%' }}
 	  />
 	  <span>Token</span>
-	</div>
-	<div className="input-row">
-	  <input
-	    type="text"
-	    placeholder="Script reference TxId"
-	    value={scriptRefD}
-	    onChange={(e) => setScriptRefD(e.target.value)}
-	    style={{ width: '60%' }}
-	  />
-	  <span>Script Ref TxId</span>
 	</div>
         <button onClick={handleBurn} style={{ marginLeft: '10rem' }}>Burn zkPass token</button>	
         {sendStatusD && <p style={{ marginTop: '1rem', color: sendStatusD.startsWith('✅') ? 'green' : 'red' }}>{sendStatusD}</p>}

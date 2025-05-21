@@ -25,7 +25,7 @@ The zkPass dApp is divided in four sections:
 
 Initializes the zkPass setup and sends the zkPass smart contracts (*zkPassToken* verifier and *forwardMint* script) as reference scripts to "zkPass-main", a wallet address of your choice.
 
-*Task-ID* is any integer of your choice and serves to differentiate *forwardMint* script addresses.
+*ForwardingMint Tag* is any integer of your choice and serves to differentiate *forwardMint* script addresses.
 
 ### Transfer reward
 
@@ -40,10 +40,8 @@ A *zkPass result* is computed and displayed; it is taken as public input for the
 Token minting certifies that proof for this input (i.e. zkPass result) has been provided.
 
 - Currency symbol is the policy id of *zkPassToken* verifier, which is parametrized by the initial setup.
-- Token name is the zkPass result.
-- Generated proof needs to be passed as redeemer in order to mint the zkPass token.
-
-DApp automatically fills the TxId for the script references.  (This can be sent offline to the wallet that will perform the minting.)
+- Token name is the hash of zkPass result.
+- Generated proof is passed as redeemer in order to mint the zkPass token.
 
 ### Burn and retrieve reward
 
